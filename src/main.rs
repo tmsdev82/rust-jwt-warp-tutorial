@@ -1,10 +1,10 @@
 use log::info;
 use std::{collections::HashMap, convert::Infallible, sync::Arc};
 use tokio::sync::Mutex;
-use warp::{Filter};
+use warp::Filter;
 
-mod models;
 mod handlers;
+mod models;
 
 type UsersDb = Arc<Mutex<HashMap<String, models::User>>>;
 
@@ -22,9 +22,7 @@ async fn main() {
         .and(with_users_db(users_db.clone()))
         .and_then(handlers::create_user);
 
-    let routes = root
-    .or(user_route)
-    .with(warp::cors().allow_any_origin());
+    let routes = root.or(user_route).with(warp::cors().allow_any_origin());
 
     warp::serve(routes).run(([127, 0, 0, 1], 5000)).await;
 }
