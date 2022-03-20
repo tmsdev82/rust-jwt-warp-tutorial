@@ -5,6 +5,7 @@ use warp::Filter;
 
 mod handlers;
 mod models;
+mod security;
 
 type UsersDb = Arc<Mutex<HashMap<String, models::User>>>;
 

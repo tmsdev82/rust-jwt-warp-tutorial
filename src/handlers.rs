@@ -1,9 +1,8 @@
-use crate::{models, UsersDb};
+use crate::{models, UsersDb, security};
 use log::{error, info};
 use warp::{
     http::{Response, StatusCode}, Reply, Rejection,
 };
-
 
 pub async fn create_user(user: models::CreateUser, users_db: UsersDb) -> std::result::Result<impl Reply, Rejection> {
     info!("Create user, received UserData: {:?}", user);
@@ -21,7 +20,7 @@ pub async fn create_user(user: models::CreateUser, users_db: UsersDb) -> std::re
     let created_user = models::User {
         user_id: key_count,
         username: user.username,
-        password: user.password,
+        password: security::get_hashed_password(&user.password),
         role: user.role,
     };
     local_db.insert(created_user.username.clone(), created_user.clone());
