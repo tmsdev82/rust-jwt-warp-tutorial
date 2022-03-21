@@ -23,7 +23,16 @@ async fn main() {
         .and(with_users_db(users_db.clone()))
         .and_then(handlers::create_user);
 
-    let routes = root.or(user_route).with(warp::cors().allow_any_origin());
+    let login_route = warp::path("login")
+        .and(warp::post())
+        .and(warp::body::json())
+        .and(with_users_db(users_db.clone()))
+        .and_then(handlers::login);
+
+    let routes = root
+        .or(user_route)
+        .or(login_route)
+        .with(warp::cors().allow_any_origin());
 
     warp::serve(routes).run(([127, 0, 0, 1], 5000)).await;
 }

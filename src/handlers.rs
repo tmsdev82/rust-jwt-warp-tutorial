@@ -30,3 +30,29 @@ pub async fn create_user(user: models::CreateUser, users_db: UsersDb) -> std::re
         .status(StatusCode::CREATED)
         .body(serde_json::to_string(&created_user).unwrap()))
 }
+
+pub async fn login(login_user: models::LoginUser, users_db: UsersDb) -> std::result::Result<impl Reply, Rejection> {
+    info!("Received login request...");
+    let cur_user_db = users_db.lock().await;
+    let user = match cur_user_db.get(&login_user.username) {
+        Some(k) => k,
+        None => {
+            error!("User '{}' not found in database", &login_user.username);
+            return Ok(Response::builder()
+                .status(StatusCode::BAD_REQUEST)
+                .body("login failed".to_string()));
+        }
+    };
+
+    info!("User found, verifying password...");
+    if !security::verify_password(&login_user.password, &user.password) {
+        error!("Password incorrect for user: {}", &login_user.username);
+        return Ok(Response::builder()
+            .status(StatusCode::BAD_REQUEST)
+            .body("login failed".to_string()));
+    }
+
+    info!("Login success!");
+    let token = security::get_jwt_for_user(user);
+    Ok(Response::builder().status(StatusCode::OK).body(token))
+}
