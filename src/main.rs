@@ -1,13 +1,15 @@
 use log::info;
 use std::{collections::HashMap, convert::Infallible, sync::Arc};
 use tokio::sync::Mutex;
-use warp::Filter;
+use warp::{Filter, Rejection};
 
+mod errors;
 mod handlers;
 mod models;
 mod security;
 
 type UsersDb = Arc<Mutex<HashMap<String, models::User>>>;
+type Result<T> = std::result::Result<T, Rejection>;
 
 #[tokio::main]
 async fn main() {
@@ -32,7 +34,8 @@ async fn main() {
     let routes = root
         .or(user_route)
         .or(login_route)
-        .with(warp::cors().allow_any_origin());
+        .with(warp::cors().allow_any_origin())
+        .recover(errors::handle_rejection);
 
     warp::serve(routes).run(([127, 0, 0, 1], 5000)).await;
 }

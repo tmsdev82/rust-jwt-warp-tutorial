@@ -935,6 +935,7 @@ dependencies = [
  "scrypt",
  "serde",
  "serde_json",
+ "thiserror",
  "tokio",
  "uuid",
  "warp",

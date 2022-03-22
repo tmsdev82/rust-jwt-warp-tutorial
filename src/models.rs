@@ -27,3 +27,8 @@ pub struct Claims {
     pub role: String,
     pub exp: usize,
 }
+
+#[derive(Serialize)]
+pub struct LoginResponse {
+    pub token: String,
+}
