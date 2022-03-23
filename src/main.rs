@@ -30,10 +30,16 @@ async fn main() {
         .and(warp::body::json())
         .and(with_users_db(users_db.clone()))
         .and_then(handlers::login);
+    
+    let private_route = warp::path("private")
+        .and(warp::get())
+        .and(security::with_auth(security::Role::User))
+        .and_then(handlers::get_private);
 
     let routes = root
         .or(user_route)
         .or(login_route)
+        .or(private_route)
         .with(warp::cors().allow_any_origin())
         .recover(errors::handle_rejection);
 

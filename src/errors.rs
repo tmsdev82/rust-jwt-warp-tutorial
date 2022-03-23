@@ -10,6 +10,16 @@ pub enum CustomError {
     InvalidCredentialsError,
     #[error("user exists")]
     UserExistsError(String),
+    #[error("invalid jwt token")]
+    InvalidJWTTokenError,
+    #[error("jwt token creation error")]
+    JWTTokenCreationError,
+    #[error("authorization header required")]
+    AuthHeaderRequiredError,
+    #[error("invalid auth header")]
+    InvalidAuthHeaderError,
+    #[error("not authorized")]
+    NotAuthorizedError,
 }
 
 impl warp::reject::Reject for CustomError {}
@@ -38,10 +48,19 @@ pub async fn handle_rejection(err: Rejection) -> std::result::Result<impl Reply,
         match e {
             CustomError::InvalidCredentialsError => {
                 return Ok(reply_with_status(StatusCode::FORBIDDEN, &e.to_string()));
-            }
+            },
             CustomError::UserExistsError(username) => {
                 return Ok(reply_with_status(StatusCode::BAD_REQUEST, &format!("User: {} already exists", username)));
-            }
+            },
+            CustomError::NotAuthorizedError => {
+                return Ok(reply_with_status(StatusCode::UNAUTHORIZED, &e.to_string()));
+            },
+            CustomError::InvalidJWTTokenError => {
+                return Ok(reply_with_status(StatusCode::UNAUTHORIZED, &e.to_string()));
+            },
+            CustomError::JWTTokenCreationError => {
+                return Ok(reply_with_status(StatusCode::INTERNAL_SERVER_ERROR, "Internal Server Error"));
+            },
             _ => {
                 return Ok(reply_with_status(StatusCode::BAD_REQUEST, &e.to_string()));
             }

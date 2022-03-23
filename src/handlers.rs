@@ -51,3 +51,22 @@ pub async fn login(login_user: models::LoginUser, users_db: UsersDb) -> Result<i
     let token = security::get_jwt_for_user(user);
     Ok(Response::builder().status(StatusCode::OK).body(token))
 }
+
+pub async fn get_private(username: String) -> Result<impl Reply> {
+    info!("Return private page.");
+
+    Ok(warp::reply::html(format!(
+        r#"
+    <html>
+        <head>
+            <title>Private space</title>
+        <head>
+        <body>
+            <h1>Private</h1>
+            <div>Logged in user: {}</div>
+        </body>
+    </html>
+    "#,
+        &username
+    )))
+}
