@@ -35,11 +35,18 @@ async fn main() {
         .and(warp::get())
         .and(security::with_auth(security::Role::User))
         .and_then(handlers::get_private);
+    
+    let admin_only_route = warp::path("admin_only")
+        .and(warp::get())
+        .and(with_users_db(users_db))
+        .and(security::with_auth(security::Role::Admin))
+        .and_then(handlers::get_admin_only);
 
     let routes = root
         .or(user_route)
         .or(login_route)
         .or(private_route)
+        .or(admin_only_route)
         .with(warp::cors().allow_any_origin())
         .recover(errors::handle_rejection);
 

@@ -70,3 +70,26 @@ pub async fn get_private(username: String) -> Result<impl Reply> {
         &username
     )))
 }
+
+pub async fn get_admin_only(users_db: UsersDb, username: String) -> Result<impl Reply> {
+    info!("Return admin only page.");
+
+    Ok(warp::reply::html(format!(
+        r#"
+    <html>
+        <head>
+            <title>Public space</title>
+        <head>
+        <body>
+            <h1>Admin only</h1>
+            <div>Logged in user: {}</div>
+            <div>
+                <b>Number of users in the database: {}</b>
+            </div>
+        </body>
+    </html>
+    "#,
+        &username,
+        users_db.lock().await.len()
+    )))
+}
