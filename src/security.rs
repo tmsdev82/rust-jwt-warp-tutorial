@@ -13,8 +13,6 @@ use warp::{
 use log::debug;
 use std::fmt;
 
-const JWT_SECRET: &[u8; 10] = b"our_secret";
-
 #[derive(Clone, PartialEq)]
 pub enum Role {
     User,
@@ -37,6 +35,10 @@ impl fmt::Display for Role {
             Role::Admin => write!(f, "Admin"),
         }
     }
+}
+
+fn get_secret() -> Vec<u8> {
+    std::env::var("JWT_SECRET").unwrap().into_bytes()
 }
 
 pub fn get_hashed_password(password: &str) -> String {
@@ -72,7 +74,7 @@ pub fn get_jwt_for_user(user: &models::User) -> String {
     let token = match encode(
         &Header::default(),
         &user_claims,
-        &EncodingKey::from_secret(JWT_SECRET),
+        &EncodingKey::from_secret(&get_secret()),
     ) {
         Ok(t) => t,
         Err(_) => panic!(),
@@ -113,7 +115,7 @@ async fn authorize((role, headers): (Role, HeaderMap<HeaderValue>)) -> Result<St
         Ok(jwt) => {
             let decoded = decode::<models::Claims>(
                 &jwt,
-                &DecodingKey::from_secret(JWT_SECRET),
+                &DecodingKey::from_secret(&get_secret()),
                 &Validation::default(),
             )
             .map_err(|_| reject::custom(errors::CustomError::InvalidJWTTokenError))?;

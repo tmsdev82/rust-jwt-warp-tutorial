@@ -13,6 +13,7 @@ type Result<T> = std::result::Result<T, Rejection>;
 
 #[tokio::main]
 async fn main() {
+    dotenv::dotenv().ok();
     log4rs::init_file("logconfig.yml", Default::default()).expect("Log config file not found.");
     info!("Starting server...");
     let users_db: UsersDb = Arc::new(Mutex::new(HashMap::new()));

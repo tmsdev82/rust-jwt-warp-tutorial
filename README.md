@@ -11,7 +11,15 @@ How and why the code is built like this is explained in a tutorial on my blog: [
 
 # Running the program
 
-The program is run using the command: `cargo run` or `cargo run --release` no additional configuration is needed.
+A file called `.env` needs to be present in the root of the project with a line 
+
+```
+JWT_SECRET=our_secret
+```
+
+Please create this `.env` file before running the project.
+
+The program is run using the command: `cargo run` or `cargo run --release`.
 
 Creating a user with a user role can be done using the following request:
 
